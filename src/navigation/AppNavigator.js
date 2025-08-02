@@ -4,9 +4,9 @@ import DrawerNavigator from './DrawerNavigator';
 
 const AppNavigator = () => {
   return (
-    <NavigationContainer>
-      <DrawerNavigator />
-    </NavigationContainer>
+          <NavigationContainer>
+          <DrawerNavigator />
+          </NavigationContainer>
   );
 };
 
