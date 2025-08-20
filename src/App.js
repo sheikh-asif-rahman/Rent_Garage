@@ -9,5 +9,4 @@ const App = () => {
       </SafeAreaProvider>
   );
 };
-
 export default App;
