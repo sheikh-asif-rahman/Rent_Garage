@@ -1,113 +1,240 @@
-import React, { useRef, useEffect } from "react";
-import { Animated, TouchableOpacity, Easing } from "react-native";
-import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import React, { useState, useRef, useEffect } from "react";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Animated,
+  Easing,
+  StyleSheet,
+  Dimensions,
+} from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import Icon from "react-native-vector-icons/Ionicons";
+import { SafeAreaProvider, useSafeAreaInsets } from "react-native-safe-area-context";
 
 import HomeScreen from "../screens/HomeScreen";
-import SearchScreen from "../screens/HomeScreen";
-// import ProfileScreen from "../screens/HomeScreen";
+import SearchScreen from "../screens/Search";
 import SettingsScreen from "../screens/Settings";
 
 import { COLORS } from "../constants/colors";
 
-const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
+const { width } = Dimensions.get("window");
 
-// Smooth continuous breathing animation
-const AnimatedIcon = ({ name, color, size, focused }) => {
-  const progress = useRef(new Animated.Value(0)).current;
+// ---------- Animated Icon ----------
+const AnimatedIcon = ({ name, focused, size, color }) => {
+  const scaleAnim = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
     let animation;
     if (focused) {
       animation = Animated.loop(
-        Animated.timing(progress, {
-          toValue: 1,
-          duration: 1500, // 2 seconds per full cycle
-          easing: Easing.inOut(Easing.sin), // smooth sine-like easing
-          useNativeDriver: true,
-          isInteraction: false,
-        })
+        Animated.sequence([
+          Animated.timing(scaleAnim, {
+            toValue: 1.2,
+            duration: 400,
+            easing: Easing.inOut(Easing.sin),
+            useNativeDriver: true,
+          }),
+          Animated.timing(scaleAnim, {
+            toValue: 1,
+            duration: 400,
+            easing: Easing.inOut(Easing.sin),
+            useNativeDriver: true,
+          }),
+        ])
       );
       animation.start();
     } else {
-      progress.stopAnimation();
-      progress.setValue(0);
+      scaleAnim.stopAnimation();
+      scaleAnim.setValue(1);
     }
 
-    return () => {
-      if (animation) animation.stop();
-    };
+    return () => animation && animation.stop();
   }, [focused]);
 
-  // Interpolate progress to scale smoothly 0.95 → 1.05 → 0.95
-  const scale = progress.interpolate({
-    inputRange: [0, 0.5, 1],
-    outputRange: [0.95, 1.05, 0.95],
-  });
-
   return (
-    <Animated.View style={{ transform: [{ scale }] }}>
+    <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
       <Icon name={name} size={size} color={color} />
     </Animated.View>
   );
 };
 
-function BottomTabs() {
+// ---------- AppBar Component ----------
+const AppBar = ({ title }) => {
+  const insets = useSafeAreaInsets();
   return (
-    <Tab.Navigator
-      screenOptions={({ route }) => ({
-        headerTitleAlign: "center",
-        headerStyle: { backgroundColor: COLORS.primary },
-        headerTintColor: COLORS.secondary,
-        tabBarActiveTintColor: COLORS.secondary,
-        tabBarInactiveTintColor: COLORS.inactiveItem,
-        tabBarStyle: { backgroundColor: COLORS.primary, paddingBottom: 5 },
-        tabBarIcon: ({ focused, color, size }) => {
-          let iconName;
-          switch (route.name) {
-            case "Home":
-              iconName = focused ? "home" : "home-outline";
-              break;
-            case "Search":
-              iconName = focused ? "search" : "search-outline";
-              break;
-            // case "Profile":
-            //   iconName = focused ? "person" : "person-outline";
-            //   break;
-            case "Settings":
-              iconName = focused ? "settings" : "settings-outline";
-              break;
-          }
-          return <AnimatedIcon name={iconName} focused={focused} color={color} size={size} />;
-        },
-        tabBarButton: (props) => (
-          <TouchableOpacity {...props} activeOpacity={1}>
-            {props.children}
-          </TouchableOpacity>
-        ),
-      })}
+    <View
+      style={[
+        styles.appBarContainer,
+        { paddingTop: insets.top, height: insets.top + 60 },
+      ]}
     >
-      <Tab.Screen name="Home" component={HomeScreen} />
-      <Tab.Screen name="Search" component={SearchScreen} />
-      {/* <Tab.Screen name="Profile" component={ProfileScreen} /> */}
-      <Tab.Screen name="Settings" component={SettingsScreen} />
-    </Tab.Navigator>
+      <Text style={styles.appBarTitle}>{title}</Text>
+      <TouchableOpacity style={styles.appBarIcon}>
+        <Icon name="notifications-outline" size={24} color={COLORS.secondary} />
+      </TouchableOpacity>
+    </View>
+  );
+};
+
+// ---------- Two-layer Floating Bottom Bar ----------
+const CoolBottomBar = ({ tabs, activeIndex, onPress }) => {
+  const insets = useSafeAreaInsets();
+  const barHeight = 70;
+
+  return (
+    <View style={[styles.coolBarContainer, { bottom: insets.bottom }]}>
+      {/* White background bar */}
+      <View style={[styles.coolBarBackground, { height: barHeight }]} />
+
+      {/* Tabs */}
+      <View style={[styles.coolBarTabs, { height: barHeight }]}>
+        {tabs.map((tab, index) => {
+          const isActive = index === activeIndex;
+          return (
+            <TouchableOpacity
+              key={index}
+              style={styles.coolTabButton}
+              activeOpacity={1}
+              onPress={() => onPress(index)}
+            >
+              {isActive && (
+                <View
+                  style={[
+                    styles.activeTabPill,
+                    { height: barHeight * 0.9, borderRadius: (barHeight * 0.9) / 2 },
+                  ]}
+                />
+              )}
+              <View style={styles.tabContent}>
+                <AnimatedIcon
+                  name={tab.iconName}
+                  focused={isActive}
+                  color={isActive ? COLORS.secondary : COLORS.inactiveItem}
+                  size={24}
+                />
+                <Text
+                  style={{
+                    color: isActive ? COLORS.secondary : COLORS.inactiveItem,
+                    fontSize: 12,
+                    marginTop: 2,
+                  }}
+                >
+                  {tab.title}
+                </Text>
+              </View>
+            </TouchableOpacity>
+          );
+        })}
+      </View>
+    </View>
+  );
+};
+
+
+// ---------- Main Scaffold ----------
+const Scaffold = ({ tabs, screens, appBarTitle }) => {
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  return (
+    <View style={{ flex: 1, backgroundColor: COLORS.background }}>
+      <AppBar title={appBarTitle} />
+      <View style={{ flex: 1 }}>{screens[activeIndex]}</View>
+      <CoolBottomBar tabs={tabs} activeIndex={activeIndex} onPress={setActiveIndex} />
+    </View>
+  );
+};
+
+// ---------- App Navigator ----------
+export default function AppNavigator() {
+  const tabs = [
+    { title: "Home", iconName: "home" },
+    { title: "Search", iconName: "search" },
+    { title: "Settings", iconName: "settings" },
+  ];
+
+  const screens = [
+    <HomeScreen key="home" />,
+    <SearchScreen key="search" />,
+    <SettingsScreen key="settings" />,
+  ];
+
+  return (
+    <SafeAreaProvider>
+      <NavigationContainer>
+        <Stack.Navigator screenOptions={{ headerShown: false }}>
+          <Stack.Screen
+            name="Main"
+            options={{}}
+            children={() => <Scaffold tabs={tabs} screens={screens} appBarTitle="My App" />}
+          />
+        </Stack.Navigator>
+      </NavigationContainer>
+    </SafeAreaProvider>
   );
 }
 
-export default function AppNavigator() {
-  return (
-    <NavigationContainer>
-      <Stack.Navigator>
-        <Stack.Screen
-          name="Main"
-          component={BottomTabs}
-          options={{ headerShown: false }}
-        />
-      </Stack.Navigator>
-    </NavigationContainer>
-  );
-}
+// ---------- Styles ----------
+const styles = StyleSheet.create({
+  appBarContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    backgroundColor: COLORS.primary,
+    paddingHorizontal: 15,
+  },
+  appBarTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: COLORS.secondary,
+  },
+  appBarIcon: {
+    padding: 5,
+  },
+
+  // Bottom Bar Styles
+  coolBarContainer: {
+    position: "absolute",
+    width: width,
+    alignItems: "center",
+    zIndex: 10,
+  },
+  coolBarBackground: {
+    position: "absolute",
+    bottom: 0,
+    width: width * 0.95,
+    height: 70,
+    backgroundColor: "#fff", // bottom layer
+    borderRadius: 35,
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowOffset: { width: 0, height: 5 },
+    shadowRadius: 10,
+    elevation: 5,
+  },
+  coolBarTabs: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    width: width * 0.95,
+    paddingVertical: 10,
+  },
+  coolTabButton: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  activeTabPill: {
+  position: "absolute",
+  width: 115,
+  borderRadius: (70 * 0.9) / 2, // make it fully rounded
+  backgroundColor: COLORS.primary, // top layer
+  zIndex: -1,
+},
+
+  tabContent: {
+    alignItems: "center",
+    justifyContent: "center",
+  },
+});
