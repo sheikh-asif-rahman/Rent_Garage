@@ -7,8 +7,8 @@ import Icon from "react-native-vector-icons/Ionicons";
 
 import HomeScreen from "../screens/HomeScreen";
 import SearchScreen from "../screens/HomeScreen";
-import ProfileScreen from "../screens/HomeScreen";
-import SettingsScreen from "../screens/HomeScreen";
+// import ProfileScreen from "../screens/HomeScreen";
+import SettingsScreen from "../screens/Settings";
 
 import { COLORS } from "../constants/colors";
 
@@ -74,9 +74,9 @@ function BottomTabs() {
             case "Search":
               iconName = focused ? "search" : "search-outline";
               break;
-            case "Profile":
-              iconName = focused ? "person" : "person-outline";
-              break;
+            // case "Profile":
+            //   iconName = focused ? "person" : "person-outline";
+            //   break;
             case "Settings":
               iconName = focused ? "settings" : "settings-outline";
               break;
@@ -92,7 +92,7 @@ function BottomTabs() {
     >
       <Tab.Screen name="Home" component={HomeScreen} />
       <Tab.Screen name="Search" component={SearchScreen} />
-      <Tab.Screen name="Profile" component={ProfileScreen} />
+      {/* <Tab.Screen name="Profile" component={ProfileScreen} /> */}
       <Tab.Screen name="Settings" component={SettingsScreen} />
     </Tab.Navigator>
   );

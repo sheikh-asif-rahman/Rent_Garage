@@ -1,6 +1,6 @@
 export const COLORS = {
-  primary: '#3db5ffff',  // Purple
+  primary: '#009af9ff',  // Purple
   secondary: '#ffffff',  // White
   activeItem: '#ffffffff',
-  inactiveItem: '#0062ffff',
+  inactiveItem: '#000000ff',
 };
