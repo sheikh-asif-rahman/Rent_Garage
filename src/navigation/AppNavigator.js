@@ -13,8 +13,8 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import Icon from "react-native-vector-icons/Ionicons";
 import { SafeAreaProvider, useSafeAreaInsets } from "react-native-safe-area-context";
 
-import HomeScreen from "../screens/HomeScreen";
-import SearchScreen from "../screens/Search";
+import HomeScreen from "../screens/ExploreScreen";
+import Dashboard from "../screens/Dashboard"; // renamed component
 import SettingsScreen from "../screens/Settings";
 
 import { COLORS } from "../constants/colors";
@@ -133,7 +133,6 @@ const CoolBottomBar = ({ tabs, activeIndex, onPress }) => {
   );
 };
 
-
 // ---------- Main Scaffold ----------
 const Scaffold = ({ tabs, screens, appBarTitle }) => {
   const [activeIndex, setActiveIndex] = useState(0);
@@ -150,14 +149,14 @@ const Scaffold = ({ tabs, screens, appBarTitle }) => {
 // ---------- App Navigator ----------
 export default function AppNavigator() {
   const tabs = [
-    { title: "Home", iconName: "home" },
-    { title: "Search", iconName: "search" },
+    { title: "Explore", iconName: "search" },
+    { title: "Dashboard", iconName: "home" }, // updated title
     { title: "Settings", iconName: "settings" },
   ];
 
   const screens = [
     <HomeScreen key="home" />,
-    <SearchScreen key="search" />,
+    <Dashboard key="dashboard" />, // updated component
     <SettingsScreen key="settings" />,
   ];
 
@@ -226,12 +225,12 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   activeTabPill: {
-  position: "absolute",
-  width: 115,
-  borderRadius: (70 * 0.9) / 2, // make it fully rounded
-  backgroundColor: COLORS.primary, // top layer
-  zIndex: -1,
-},
+    position: "absolute",
+    width: 115,
+    borderRadius: (70 * 0.9) / 2,
+    backgroundColor: COLORS.primary,
+    zIndex: -1,
+  },
 
   tabContent: {
     alignItems: "center",

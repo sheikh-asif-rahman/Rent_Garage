@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, TextInput, Text, StyleSheet } from 'react-native';
 
-const Search = () => {
+const Dashboard = () => {
     const [query, setQuery] = useState('');
 
     return (
@@ -38,4 +38,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default Search;
+export default Dashboard;
