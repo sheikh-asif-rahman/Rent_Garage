@@ -13,6 +13,7 @@ import {
 } from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
 import { COLORS } from "../constants/colors";
+import LoadingPopup from "../components/LoadingPopup"; // import here
 
 const { width } = Dimensions.get("window");
 const COLUMN_COUNT = 2;
@@ -21,6 +22,7 @@ const CARD_WIDTH = (width - CARD_MARGIN * (COLUMN_COUNT * 2)) / COLUMN_COUNT;
 
 export default function ExploreScreen({ navigation }) {
   const [searchQuery, setSearchQuery] = useState("");
+  const [loading, setLoading] = useState(false);
 
   // Bouncing location icon
   const bounceValue = useRef(new Animated.Value(0)).current;
@@ -35,15 +37,23 @@ export default function ExploreScreen({ navigation }) {
 
   const handleSearch = () => {
     Keyboard.dismiss();
-    console.log("Search:", searchQuery);
+    setLoading(true);
+    // simulate request
+    setTimeout(() => {
+      setLoading(false);
+      console.log("Search:", searchQuery);
+    }, 2000);
   };
 
   const handleLocationPress = () => {
-    if (navigation && navigation.navigate) {
-      navigation.navigate("MapScreen"); // MapScreen should exist in your navigator
-    } else {
-      console.log("Navigate pressed!");
-    }
+     setLoading(true);
+    // simulate location fetch
+    setTimeout(() => {
+      setLoading(false);
+      if (navigation?.navigate) {
+        navigation.navigate("MapScreen");
+      }
+    }, 2000);
   };
 
   // Sample staggered data
@@ -66,7 +76,7 @@ export default function ExploreScreen({ navigation }) {
       <View style={styles.searchBarContainer}>
         <TextInput
           style={styles.searchInput}
-          placeholder="Search cars..."
+          placeholder="Search"
           placeholderTextColor={COLORS.textMuted}
           value={searchQuery}
           onChangeText={setSearchQuery}
@@ -84,7 +94,7 @@ export default function ExploreScreen({ navigation }) {
         onPress={handleLocationPress}
         activeOpacity={0.8}
       >
-        <Text style={styles.locationText}>Current Location: Dhaka, Bangladesh</Text>
+        <Text style={styles.locationText}>Dhaka, Bangladesh</Text>
         <Animated.View style={{ transform: [{ translateY: bounceValue }] }}>
           <Icon name="location-sharp" size={20} color={COLORS.primary} />
         </Animated.View>
@@ -113,6 +123,8 @@ export default function ExploreScreen({ navigation }) {
           </View>
         )}
       />
+      {/* Loading Popup */}
+      <LoadingPopup visible={loading} />
     </View>
   );
 }
@@ -137,7 +149,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     marginHorizontal: 12,
     marginBottom: 10,
-    borderBottomWidth: 1,
+ 
     borderBottomColor: COLORS.border,
     paddingBottom: 6,
   },
