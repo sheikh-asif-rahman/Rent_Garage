@@ -6,7 +6,7 @@ import {
   TouchableOpacity,
   FlatList,
   Image,
-  StyleSheet,
+  StyleSheet, 
   Keyboard,
   Animated,
   Dimensions,
