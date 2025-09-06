@@ -77,7 +77,7 @@ export default function ExploreScreen({ navigation }) {
         <TextInput
           style={styles.searchInput}
           placeholder="Search"
-          placeholderTextColor={COLORS.textMuted}
+          placeholderTextColor={COLORS.inactiveItem}
           value={searchQuery}
           onChangeText={setSearchQuery}
           onSubmitEditing={handleSearch}

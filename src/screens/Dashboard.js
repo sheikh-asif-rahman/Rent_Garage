@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -7,6 +7,7 @@ import {
   Dimensions,
   FlatList,
   ImageBackground,
+  ActivityIndicator,
 } from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
 
@@ -20,27 +21,62 @@ const buttonsData = [
   { id: "5", name: "chatbubbles", label: "Chat" },
 ];
 
-const sliderData = [
-  { id: "1", image: "https://picsum.photos/400/200?random=1", title: "Text 1" },
-  { id: "2", image: "https://picsum.photos/400/200?random=2", title: "Text 2" },
-  { id: "3", image: "https://picsum.photos/400/200?random=3", title: "Text 3" },
-];
-
 const Dashboard = () => {
-  const renderSlide = ({ item }) => (
-    <TouchableOpacity style={styles.sliderWrapper} activeOpacity={0.8}>
-      <ImageBackground source={{ uri: item.image }} style={styles.sliderImage}>
-        <View style={styles.overlay} />
-        <Text style={styles.sliderText}>{item.title}</Text>
-      </ImageBackground>
-    </TouchableOpacity>
-  );
+  const [sliderData, setSliderData] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Example API call
+    fetch("https://jsonplaceholder.typicode.com/photos?_limit=3")
+      .then((res) => res.json())
+      .then((data) => {
+        // Map API data to match slider structure
+        const mappedData = data.map((item) => ({
+          id: item.id.toString(),
+          image: item.url,
+          title: item.title,
+        }));
+        // Append Add card at the end
+        setSliderData([...mappedData, { id: "add", type: "add" }]);
+      })
+      .catch((err) => console.log(err))
+      .finally(() => setLoading(false));
+  }, []);
+
+  const renderSlide = ({ item }) => {
+    if (item.type === "add") {
+      return (
+        <TouchableOpacity
+          style={[styles.sliderWrapper, styles.addCard]}
+          activeOpacity={0.8}
+          onPress={() => console.log("Add card clicked")}
+        >
+          <Icon name="add" size={40} color="#fff" />
+          <Text style={styles.addText}>Add</Text>
+        </TouchableOpacity>
+      );
+    }
+
+    return (
+      <TouchableOpacity style={styles.sliderWrapper} activeOpacity={0.8}>
+        <ImageBackground
+          source={{ uri: item.image }}
+          style={styles.sliderImage}
+          imageStyle={{ borderRadius: 16 }}
+          resizeMode="cover"
+        >
+          <View style={styles.overlay} />
+          <Text style={styles.sliderText}>{item.title}</Text>
+        </ImageBackground>
+      </TouchableOpacity>
+    );
+  };
 
   return (
     <View style={styles.container}>
-      {/* First Big Complex Container */}
+      {/* First Big Container */}
       <View style={[styles.card, { width: width * 0.9 }]}>
-        {/* Row 1: 5 Buttons */}
+        {/* Row 1: Buttons */}
         <View style={styles.buttonRow}>
           {buttonsData.map((btn) => (
             <TouchableOpacity key={btn.id} style={styles.iconButton}>
@@ -52,18 +88,22 @@ const Dashboard = () => {
           ))}
         </View>
 
-        {/* Row 2: Slider with image and text */}
-        <FlatList
-          data={sliderData}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          keyExtractor={(item) => item.id}
-          renderItem={renderSlide}
-          contentContainerStyle={{ paddingVertical: 16 }}
-        />
+        {/* Row 2: Slider */}
+        {loading ? (
+          <ActivityIndicator size="large" color="#34affc" style={{ marginVertical: 20 }} />
+        ) : (
+          <FlatList
+            data={sliderData}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            keyExtractor={(item) => item.id}
+            renderItem={renderSlide}
+            contentContainerStyle={{ paddingVertical: 16 }}
+          />
+        )}
       </View>
 
-      {/* Other 2 Empty Containers */}
+      {/* Other Empty Containers */}
       <View style={styles.card}>
         <Text style={styles.emptyText}>Empty Container 1</Text>
       </View>
@@ -119,8 +159,7 @@ const styles = StyleSheet.create({
     marginRight: 16,
   },
   sliderImage: {
-    width: "100%",
-    height: "100%",
+    flex: 1,
     justifyContent: "flex-end",
     padding: 12,
   },
@@ -133,6 +172,17 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 16,
     fontWeight: "bold",
+  },
+  addCard: {
+    backgroundColor: "#444",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  addText: {
+    color: "#fff",
+    marginTop: 8,
+    fontSize: 14,
+    fontWeight: "600",
   },
   emptyText: {
     textAlign: "center",
